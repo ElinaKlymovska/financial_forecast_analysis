@@ -1,0 +1,7 @@
+streamlit
+langchain
+requests
+boto3
+pandas
+matplotlib
+reportlab
