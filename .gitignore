@@ -6,9 +6,13 @@ __pycache__/
 # Virtualenv
 venv/
 .env/
+.env
 
 # PyCharm
 .idea/
 
 # Logs
 *.log
+.aws
+
+chromedriver-mac-arm64
