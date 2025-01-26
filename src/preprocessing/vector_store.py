@@ -1,5 +1,6 @@
 from langchain.text_splitter import CharacterTextSplitter
 from langchain_aws import BedrockEmbeddings
+from langchain_community.vectorstores import FAISS
 
 
 def preprocess_data(data):
@@ -17,8 +18,9 @@ def create_vector_store(data):
     # Ініціалізація BedrockEmbeddings без client_kwargs
     embeddings_model = BedrockEmbeddings(region_name="us-east-1")
 
+    cleaned_data = [str(doc) if isinstance(doc, dict) else doc for doc in data]
     # Генерація embedding для кожного документа
-    embeddings_and_texts = [(embeddings_model.embed_query(doc), doc) for doc in data]
+    embeddings_and_texts = [(embeddings_model.embed_query(doc), doc) for doc in cleaned_data]
 
     # Перевірка, чи є валідні вектори
     if not embeddings_and_texts:
@@ -27,6 +29,23 @@ def create_vector_store(data):
     embeddings, texts = zip(*embeddings_and_texts)
 
     # Створення FAISS векторного сховища
-    from langchain_community.vectorstores import FAISS
     vector_store = FAISS.from_texts(list(texts), embeddings_model)
     return vector_store
+
+
+def search_vector_store(vector_store, query, k=5):
+    """
+    Пошук релевантної інформації у векторному сховищі.
+
+    :param vector_store: Векторне сховище (наприклад, FAISS).
+    :param query: Запит користувача.
+    :param k: Кількість найбільш релевантних результатів (за замовчуванням 5).
+    :return: Список релевантних документів.
+    """
+    try:
+        retriever = vector_store.as_retriever(search_type="similarity", search_kwargs={"k": k})
+        relevant_docs = retriever.get_relevant_documents(query)
+        return relevant_docs
+    except Exception as e:
+        print(f"Error searching vector store: {e}")
+        return []

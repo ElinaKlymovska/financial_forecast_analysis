@@ -2,9 +2,23 @@ import requests
 import os
 from dotenv import load_dotenv
 
+from src.ingestion.data_reception.base_datasource import DataSource
+
 load_dotenv()
 CRYPTOCOMPARE_API_KEY = os.getenv("CRYPTOCOMPARE_API_KEY")
 
+class CryptoCompareDataSource(DataSource):
+    def fetch_data(self, query=None, exclude_categories=None):
+        base_url = "https://min-api.cryptocompare.com/data/v2/news/"
+        params = {
+            "categories": ",".join(query) if query else None,
+            "excludeCategories": ",".join(exclude_categories) if exclude_categories else None,
+        }
+
+        response = requests.get(base_url, params=params)
+        response.raise_for_status()
+        data = response.json()["Data"]
+        return data
 
 def fetch_cryptocompare_news(categories=None, exclude_categories=None):
 
@@ -15,10 +29,10 @@ def fetch_cryptocompare_news(categories=None, exclude_categories=None):
         "lang": "EN",  # Мова новин
     }
 
-    if categories:# Наприклад, "Blockchain,Crypto"
+    if categories:
         params["categories"] = categories
     if exclude_categories:
-        params["excludeCategories"] = exclude_categories  # Наприклад, "Mining"
+        params["excludeCategories"] = exclude_categories
 
     headers = {
         "authorization": f"Apikey {CRYPTOCOMPARE_API_KEY}"
@@ -40,18 +54,3 @@ def fetch_cryptocompare_news(categories=None, exclude_categories=None):
     except Exception as e:
         print(f"An error occurred: {e}")
         return []
-
-
-if __name__ == "__main__":
-
-    # Отримати новини без фільтрів
-    cryptocompare_news = fetch_cryptocompare_news(categories="Blockchain,Crypto")
-
-    # Вивід новин
-    if not cryptocompare_news:
-        print("No news found.")
-    else:
-        for i, article in enumerate(cryptocompare_news, 1):
-            print(f"{i}. {article['title']}")
-            print(f"Source: {article['source']}")
-            print(f"Link: {article['url']}\n")

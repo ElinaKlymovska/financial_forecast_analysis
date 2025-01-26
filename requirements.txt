@@ -15,3 +15,5 @@ selenium~=4.21.0
 textblob
 python-dotenv
 pytest
+streamlit
+fpdf
