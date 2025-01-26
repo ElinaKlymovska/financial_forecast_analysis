@@ -1,45 +1,52 @@
-from src.analysis.state_graph_analysis import analyze_with_state_graph
-from src.ingestion.data_ingestion import ingest_data
-from src.preprocessing.vector_store import preprocess_data, create_vector_store
+import subprocess
 
-
-def main():
-    """Основний процес збору, обробки та аналізу даних."""
-
-    # Завантаження даних через API
-    query = "crypto"  # Приклад запиту
-    combined_data = ingest_data(query=query)
-
-    if not combined_data:
-        print("No data found for the given query.")
-        return
-
-    print(f"Fetched {len(combined_data)} articles from APIs.")
-
-    # Попередня обробка
-    processed_data = preprocess_data(combined_data)
-
-    # Створення векторного сховища
-    vector_store = create_vector_store(processed_data)
-
-    # Пошук у векторному сховищі
-    retriever = vector_store.as_retriever()  # Перетворення в retriever
-    query_text = "What are the latest trends in cryptocurrency?"
-    search_results = retriever.get_relevant_documents(query_text)
-    print(f"Search results for query '{query_text}':", search_results)
-
-    # Аналіз через StateGraph
-    state_graph_results = analyze_with_state_graph(processed_data)
-    print("State Graph Analysis Results:", state_graph_results)
-
-    # Аналіз через Bedrock
-    # for text in processed_data:
-    #     bedrock_result = analyze_text_with_bedrock(f"Analyze this text: {text}")
-    #     print(f"Bedrock Result for '{text}':", bedrock_result)
-    #
-    #     # Відправка у Kinesis
-    #     send_to_kinesis({"text": text, "analysis": bedrock_result})
-    #     print(f"Sent to Kinesis: {text}")
 
 if __name__ == "__main__":
-    main()
+    print("Launching Streamlit...")
+    subprocess.run(["python3", "-m", "streamlit", "run", "frontend/streamlit_app.py"])
+
+
+# import json
+# import logging
+#
+# from models.nlp_model import query_bedrock
+# from src.ingestion.data_ingestion import ingest_data
+# from src.configuration.log_config import configure_logging
+# from src.preprocessing.vector_store import preprocess_data
+#
+# configure_logging()
+#
+# if __name__ == "__main__":
+#     logging.basicConfig(level=logging.INFO)
+#
+#     # Крок 1: Збір даних
+#     logging.info("Step 1: Starting data ingestion...")
+#     ingested_data = ingest_data("crypto, blockchain, global events")
+#     logging.info(f"Step 1: Data ingestion complete. {len(ingested_data)} articles ingested.")
+#
+#     # Крок 2: Попередня обробка
+#     logging.info("Step 2: Preprocessing data...")
+#     preprocessed_data = preprocess_data(ingested_data)
+#     logging.info(f"Step 2: Data preprocessing complete. {len(preprocessed_data)} chunks generated.")
+#
+#     # Крок 3: Аналіз за допомогою Bedrock
+#     logging.info("Step 3: Analyzing data with Bedrock...")
+#
+#     # Дані для аналізу
+#     prompt_example = [
+#         "What is the impact of rising interest rates on Bitcoin prices?",
+#         "How does regulatory uncertainty affect Ethereum's adoption?"
+#     ]
+#     model_name = "anthropic.claude-3-sonnet-20240229-v1:0"
+#
+#     try:
+#         summaries = query_bedrock(prompt_example, model_name)
+#         for i, summary in enumerate(summaries):
+#             if summary:
+#                 logging.info(f"Summary {i+1}: {json.dumps(summary, indent=2)}")
+#             else:
+#                 logging.error(f"Summary {i+1} failed.")
+#     except Exception as e:
+#         logging.error(f"Failed to process queries: {str(e)}")
+
+
