@@ -13,6 +13,14 @@ venv/
 
 # Logs
 *.log
+
+
 .aws
 
-chromedriver-mac-arm64
+*.bin
+*.pickle
+*.pdf
+
+chat_history.json
+
+src/db/
