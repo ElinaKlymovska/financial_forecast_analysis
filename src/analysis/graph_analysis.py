@@ -1,11 +1,10 @@
-import logging
 from typing import TypedDict, List, Optional
 from langgraph.graph import StateGraph, START, END
 from langgraph.errors import InvalidUpdateError
 
-from logs.log_config import configure_logging
+from src.configuration.log_config import configure_logging
 
-configure_logging()
+logging = configure_logging("graph_analysis.log")
 
 # Визначення схеми стану
 class TaskState(TypedDict):

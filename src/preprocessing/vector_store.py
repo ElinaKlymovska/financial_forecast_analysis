@@ -1,6 +1,12 @@
+from langchain.chains import RetrievalQAWithSourcesChain
 from langchain.text_splitter import CharacterTextSplitter
-from langchain_aws import BedrockEmbeddings
+from langchain_aws import BedrockEmbeddings, BedrockLLM
 from langchain_community.vectorstores import FAISS
+
+from src.configuration.config import AWS_REGION, BEDROCK_MODEL
+from src.configuration.log_config import configure_logging
+
+logger = configure_logging(process_name="vector_store")
 
 
 def preprocess_data(data):
@@ -16,7 +22,7 @@ def create_vector_store(data):
         raise ValueError("No data provided for vector store creation.")
 
     # Ініціалізація BedrockEmbeddings без client_kwargs
-    embeddings_model = BedrockEmbeddings(region_name="us-east-1")
+    embeddings_model = BedrockEmbeddings(region_name=AWS_REGION)
 
     cleaned_data = [str(doc) if isinstance(doc, dict) else doc for doc in data]
     # Генерація embedding для кожного документа
@@ -49,3 +55,29 @@ def search_vector_store(vector_store, query, k=5):
     except Exception as e:
         print(f"Error searching vector store: {e}")
         return []
+
+
+def create_retrieval_chain(vector_store):
+    logger.info("Створення RetrievalQA ланцюга...")
+    try:
+        llm = BedrockLLM(model=BEDROCK_MODEL)
+
+        # Пошук векторів
+        retriever = vector_store.as_retriever(search_kwargs={"k": 3})  # 3 найбільш релевантні документи
+
+        # Створення RetrievalQA з джерелами
+        qa_chain = RetrievalQAWithSourcesChain.from_chain_type(
+            llm=llm,
+            chain_type="stuff",  # Можна замінити на map_reduce чи refine для складніших сценаріїв
+            retriever=retriever,
+            return_source_documents=True
+        )
+
+        logger.info("RetrievalQA ланцюг створено успішно.")
+        return qa_chain
+    except Exception as e:
+        logger.error("Помилка створення RetrievalQA: %s", e)
+        return None
+
+
+

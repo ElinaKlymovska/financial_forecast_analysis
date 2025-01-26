@@ -17,3 +17,4 @@ python-dotenv
 pytest
 streamlit
 fpdf
+torch
