@@ -1,8 +1,11 @@
+from datetime import datetime
+from typing import List
+
 import requests
 import os
 from dotenv import load_dotenv
 
-from src.ingestion.data_reception.base_datasource import DataSource
+from src.ingestion.data_reception.base_datasource import DataSource, NormalizedData
 
 load_dotenv()
 CRYPTOCOMPARE_API_KEY = os.getenv("CRYPTOCOMPARE_API_KEY")
@@ -18,7 +21,27 @@ class CryptoCompareDataSource(DataSource):
         response = requests.get(base_url, params=params)
         response.raise_for_status()
         data = response.json()["Data"]
-        return data
+        return self.normalize_data(data)
+
+    def normalize_data(self, data: list) -> List[NormalizedData]:
+        """
+        Нормалізація даних криптовалют у формат NormalizedData.
+        """
+        normalized_crypto = [
+            NormalizedData(
+                title=article["title"],
+                author=None,  # CryptoCompare не надає інформацію про автора
+                description=None,  # Логіка для створення короткого опису може бути додана тут
+                content=article.get("body"),
+                url=article["url"],
+                image_url=article.get("imageurl"),
+                published_at=datetime.utcfromtimestamp(article["published_on"]).isoformat(),
+                source=article["source_info"]["name"],
+            )
+            for article in data
+        ]
+        return normalized_crypto
+
 
 def fetch_cryptocompare_news(categories=None, exclude_categories=None):
 

@@ -2,10 +2,10 @@ import logging
 import os
 from datetime import datetime
 
-log_dir= "/Users/ElinaKlymovska/PycharmProjects/financial_forecast_analysis/financial_forecast_analysis/logs"
+log_dir = "/Users/ElinaKlymovska/PycharmProjects/financial_forecast_analysis/financial_forecast_analysis/logs"
 
 
-def configure_logging(process_name, log_dir=log_dir, level=logging.INFO):
+def configure_logging(process_name, log_dir=log_dir, level=logging.DEBUG):
     # Ensure the log directory exists
     os.makedirs(log_dir, exist_ok=True)
 
@@ -17,18 +17,15 @@ def configure_logging(process_name, log_dir=log_dir, level=logging.INFO):
     logger = logging.getLogger(process_name)
     logger.setLevel(level)
 
-    # Check if handlers are already added to prevent duplicates
-    if not logger.handlers:
-        # Create file handler
-        file_handler = logging.FileHandler(log_file)
-        file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+    # Clear existing handlers to prevent duplicate messages
+    if logger.hasHandlers():
+        logger.handlers.clear()
 
-        # Create stream (console) handler
-        stream_handler = logging.StreamHandler()
-        stream_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+    # Create file handler
+    file_handler = logging.FileHandler(log_file)
+    file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
 
-        # Add handlers to logger
-        logger.addHandler(file_handler)
-        logger.addHandler(stream_handler)
+    # Add handlers to logger
+    logger.addHandler(file_handler)
 
     return logger

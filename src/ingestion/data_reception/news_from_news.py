@@ -1,8 +1,11 @@
 import logging
-from src.ingestion.data_reception.base_datasource import DataSource
+from typing import List
+
 import requests
 import os
 from dotenv import load_dotenv
+
+from src.ingestion.data_reception.base_datasource import DataSource, NormalizedData
 
 load_dotenv()
 NEWS_API_KEY = os.getenv("NEWS_API_KEY")
@@ -24,8 +27,26 @@ class NewsAPIDataSource(DataSource):
         response.raise_for_status()
 
         raw_data = response.json().get("articles", [])
-        return raw_data
+        return self.normalize_data(raw_data)
 
+    def normalize_data(self, data: list) -> List[NormalizedData]:
+        """
+        Нормалізація даних новин у формат NormalizedData.
+        """
+        normalized_news = [
+            NormalizedData(
+                title=article["title"],
+                author=article.get("author"),
+                description=article.get("description"),
+                content=article.get("content"),
+                url=article["url"],
+                image_url=article.get("urlToImage"),
+                published_at=article["publishedAt"],
+                source=article["source"]["name"],
+            )
+            for article in data
+        ]
+        return normalized_news
 
 def fetch_market_news(query = None, exclude = None):
     base_url = "https://newsapi.org/v2/everything"

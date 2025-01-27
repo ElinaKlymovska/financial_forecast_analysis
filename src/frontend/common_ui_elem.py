@@ -1,9 +1,13 @@
-import pandas as pd
+from typing import List
+
 import streamlit as st
 
-from models.system_prompt import DEFAULT_QUERIES
-from src.analysis.graph_analysis import analyze_sentiment_and_correlations_with_state_graph
+from src.analysis.analyze_articles import analyze_articles, AnalysisResult
+from src.analysis.models.system_prompt import DEFAULT_QUERIES
+from src.configuration.log_config import configure_logging
 from src.ingestion.data_ingestion import ingest_data
+
+logging = configure_logging("common_ui_elem")
 
 
 def display_title():
@@ -18,34 +22,34 @@ def display_title():
 
 
 def load_and_analyze_data():
-    # User-defined additional parameters
-    st.sidebar.header("Additional Analysis Parameters")
-    additional_query = st.sidebar.text_input("Add keywords (comma-separated):", "")
-    filters = st.sidebar.multiselect(
-        "Category Filters", ["Bitcoin", "Ethereum", "Altcoins", "Market Trends"], default=[]
-    )
-
     st.write("⏳ Loading and analyzing data...")
     queries = DEFAULT_QUERIES
-    if additional_query:
-        queries.extend([q.strip() for q in additional_query.split(",")])
 
     # Fetching data
     articles = []
     for query in queries:
         data = ingest_data(query=query)
-        articles.extend(data)
+        articles.extend(data[:1])
 
     # Analyzing data
-    analysis_results = analyze_sentiment_and_correlations_with_state_graph(articles)
+    analysis_results = analyze_articles(articles[:3])
 
     # Display results
-    st.write("### Analysis Results")
-    for idx, result in enumerate(analysis_results):
-        st.write(f"**Query {idx + 1}:** {queries[idx]}")
-        st.json(result)
+    st.write("### Crypto news and insights:")
+    display_analysis_results(analysis_results)
 
-    # Display events table
-    st.write("### Most Interesting Events")
-    for article in articles[:10]:  # Displaying the first 10 articles
-        st.write(f"- **{article['title']}**: {article['content']}")
+
+def display_analysis_results(results: List[AnalysisResult]) -> None:
+    """
+    Відображає результати аналізу новин із можливістю розгортання деталей.
+    :param results: Список результатів аналізу.
+    """
+    st.write("## Analysis Results")
+    for result in results:
+        with st.expander(result.initial_data.title, expanded=False):
+            st.write(f"### {result.initial_data.title}")
+            st.write(f"**Published At:** {result.initial_data.published_at or 'Unknown'}")
+            st.write(f"**Source:** {result.initial_data.source or 'Unknown'}")
+            st.write(f"**Analysis:** {result.analyze_result}")
+            if result.initial_data.url:
+                st.markdown(f"[Read Full Article]({result.initial_data.url})", unsafe_allow_html=True)
