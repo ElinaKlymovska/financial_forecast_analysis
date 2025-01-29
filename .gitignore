@@ -24,4 +24,17 @@ venv/
 chat_history.json
 
 src/db/
-package
+python
+
+# Terraform файли
+*.tfstate
+*.tfstate.backup
+.terraform/
+terraform.lock.hcl
+
+# AWS Lambda файли
+lambda_function.py
+lambda_function.zip
+
+# JSON файли з відповідями
+response.json
