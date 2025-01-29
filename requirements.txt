@@ -19,3 +19,5 @@ streamlit
 fpdf
 torch
 psycopg2
+awscli
+terraform
