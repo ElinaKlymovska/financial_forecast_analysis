@@ -13,6 +13,29 @@ venv/
 
 # Logs
 *.log
+
+
 .aws
 
-chromedriver-mac-arm64
+*.bin
+*.pickle
+*.pdf
+
+chat_history.json
+
+src/db/
+python
+
+# Ignore infrastructure files
+infrastructure/
+terraform.tfstate
+terraform.tfstate.backup
+.terraform/
+terraform.lock.hcl
+
+# Ignore AWS Lambda-related files
+lambda_function.py
+lambda_function.zip
+
+# Ignore response JSON files
+response.json

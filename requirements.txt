@@ -4,6 +4,7 @@ langchain-community
 langchain-aws
 amazon-bedrock
 transformers
+sentence-transformers
 requests~=2.32.3
 boto3~=1.35.92
 pandas
@@ -15,3 +16,9 @@ selenium~=4.21.0
 textblob
 python-dotenv
 pytest
+streamlit
+fpdf
+torch
+psycopg2
+pypdf
+chromadb

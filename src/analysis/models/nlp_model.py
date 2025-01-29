@@ -1,22 +1,29 @@
-import boto3
-import json
 import time
 from random import randint
-import botocore.exceptions
-from dotenv import load_dotenv
-import os
 
-load_dotenv()
+import boto3
+import json
+import logging
 
-BEDROCK_MODEL = "anthropic.claude-3-sonnet-20240229-v1:0"
-REGION = os.getenv("AWS_REGION")
-MAX_RETRIES = 4
-BASE_WAIT_TIME = 2
+from botocore.exceptions import ClientError
 
-bedrock_client = boto3.client(
-    service_name='bedrock-runtime',
-    region_name=REGION
-)
+from src.analysis.models.system_prompt import SYSTEM_PROMPT
+from src.configuration.config import BEDROCK_MODEL, AWS_REGION, TEMPERATURE, MAX_TOKENS, MAX_RETRIES, BASE_WAIT_TIME
+from langchain.prompts import PromptTemplate
+
+
+# Ініціалізація клієнта Bedrock
+def init_bedrock_client():
+    """
+    Initialize Bedrock client.
+    """
+    try:
+        logging.info("Initializing Bedrock client...")
+        return boto3.client("bedrock-runtime", region_name=AWS_REGION)
+    except Exception as e:
+        logging.error(f"Failed to initialize Bedrock client: {str(e)}")
+        raise
+
 
 def build_request_body(prompt_text):
     return json.dumps({
@@ -26,15 +33,18 @@ def build_request_body(prompt_text):
         "temperature": 0.7
     })
 
+
 def parse_response(response):
     response_body = json.loads(response['body'].read().decode('utf-8'))
     return response_body.get("content", "Error parsing response")
+
 
 def analyze_text_with_bedrock(prompt_text):
     retries = 0
     while retries < MAX_RETRIES:
         try:
             body = build_request_body(prompt_text)
+            bedrock_client = init_bedrock_client()
             response = bedrock_client.invoke_model(
                 modelId=BEDROCK_MODEL,
                 contentType="application/json",
@@ -43,7 +53,7 @@ def analyze_text_with_bedrock(prompt_text):
             )
             return parse_response(response)
 
-        except botocore.exceptions.ClientError as error:
+        except ClientError as error:
             if error.response['Error']['Code'] == 'ThrottlingException':
                 retries += 1
                 wait_time = BASE_WAIT_TIME * 2 ** retries + randint(0, BASE_WAIT_TIME)
@@ -56,15 +66,3 @@ def analyze_text_with_bedrock(prompt_text):
 
     raise RuntimeError("Throttling limit reached")
 
-
-def process_text(text: str):
-    bedrock_results = analyze_text_with_bedrock(text)
-
-    # Формування результатів для відправки
-    processed_data = {
-        "text": text,
-        "bedrock_sentiment": bedrock_results["sentiment"],
-        "bedrock_entities": bedrock_results["entities"],
-        "bedrock_summary": bedrock_results["summary"]
-    }
-    return processed_data

@@ -1,9 +1,13 @@
 import boto3
-
-from src.config import AWS_REGION, KINESIS_STREAM_NAME
-
-
 import json
+import os
+from dotenv import load_dotenv
+from src.configuration.config import AWS_REGION
+
+
+load_dotenv()
+KINESIS_STREAM_NAME = os.getenv("KINESIS_STREAM_NAME")
+
 
 def send_to_kinesis(data, stream_name=KINESIS_STREAM_NAME, region_name=AWS_REGION):
     """Відправка даних у потік Kinesis."""
