@@ -26,15 +26,16 @@ chat_history.json
 src/db/
 python
 
-# Terraform файли
-*.tfstate
-*.tfstate.backup
+# Ignore infrastructure files
+infrastructure/
+terraform.tfstate
+terraform.tfstate.backup
 .terraform/
 terraform.lock.hcl
 
-# AWS Lambda файли
+# Ignore AWS Lambda-related files
 lambda_function.py
 lambda_function.zip
 
-# JSON файли з відповідями
+# Ignore response JSON files
 response.json
