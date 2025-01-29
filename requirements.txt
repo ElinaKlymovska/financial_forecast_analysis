@@ -4,6 +4,7 @@ langchain-community
 langchain-aws
 amazon-bedrock
 transformers
+sentence-transformers
 requests~=2.32.3
 boto3~=1.35.92
 pandas
@@ -19,5 +20,5 @@ streamlit
 fpdf
 torch
 psycopg2
-awscli
-terraform
+pypdf
+chromadb
