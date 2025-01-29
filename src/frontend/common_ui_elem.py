@@ -45,7 +45,7 @@ def display_analysis_results(results: Set[AnalysisResult]) -> None:
         with st.expander(result.initial_data.short_title, expanded=False):
             col1, col2 = st.columns([1, 3])
             with col1:
-                image_path = result.initial_data.image_url or "data/images/cartoon eyes.webp"
+                image_path = result.initial_data.image_url or "data/images/newspaper with cartoon eyes.webp"
                 st.image(image_path, use_container_width=True)
             with col2:
                 st.write(f"### {result.initial_data.title}")
