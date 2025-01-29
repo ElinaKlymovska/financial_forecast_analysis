@@ -8,4 +8,5 @@ logging = configure_logging("streamlit_app")
 
 display_title()
 
+load_and_analyze_data()
 display_chat_interface()

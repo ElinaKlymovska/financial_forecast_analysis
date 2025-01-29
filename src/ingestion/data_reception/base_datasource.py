@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import Set
 from dataclasses import dataclass
 from typing import Optional
 
 
-@dataclass
+@dataclass(frozen=True)
 class NormalizedData:
     title: Optional[str] = None
     author: Optional[str] = None
@@ -36,9 +36,9 @@ class DataSource(ABC):
     """
 
     @abstractmethod
-    def fetch_data(self, query=None, exclude_categories=None):
+    def fetch_data(self, query=None, exclude_categories=None) -> Set[NormalizedData]:
         pass
 
     @abstractmethod
-    def normalize_data(self, data: list) -> List[NormalizedData]:
+    def normalize_data(self, data: list) -> Set[NormalizedData]:
         pass

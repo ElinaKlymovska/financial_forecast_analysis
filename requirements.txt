@@ -18,3 +18,4 @@ pytest
 streamlit
 fpdf
 torch
+psycopg2

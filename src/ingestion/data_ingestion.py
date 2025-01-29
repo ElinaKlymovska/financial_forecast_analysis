@@ -1,9 +1,10 @@
-from typing import List
 from src.ingestion.data_reception.news_from_news import NewsAPIDataSource
 from src.ingestion.data_reception.сrypto_сompare import CryptoCompareDataSource, NormalizedData
 
+from typing import Set
 
-def ingest_data(query=None, exclude_categories=None) -> List[NormalizedData]:
+
+def ingest_data(query=None, exclude_categories=None) -> Set[NormalizedData]:
     """
     Load data from all sources with applied filters.
     """
@@ -13,5 +14,5 @@ def ingest_data(query=None, exclude_categories=None) -> List[NormalizedData]:
     crypto_data = crypto_source.fetch_data(query=query, exclude_categories=exclude_categories)
     news_data = news_source.fetch_data(query=query, exclude_categories=exclude_categories)
 
-    combined_data: List[NormalizedData] = crypto_data + news_data
+    combined_data: Set[NormalizedData] = crypto_data.union(news_data)
     return combined_data

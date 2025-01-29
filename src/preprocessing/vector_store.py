@@ -9,11 +9,14 @@ from src.configuration.log_config import configure_logging
 logger = configure_logging(process_name="vector_store")
 
 
-def preprocess_data(data):
+def preprocess_data(data) -> list:
     """Попередня обробка: текст очищується та розбивається на частини."""
+    logger.info("Попередня обробка даних...")
     splitter = CharacterTextSplitter(chunk_size=500, chunk_overlap=50)
     split_data = [splitter.split_text(str(doc)) for doc in data]
-    return [item for sublist in split_data for item in sublist]
+    result = [item for sublist in split_data for item in sublist]
+    logger.info("Попередня обробка завершена.")
+    return result
 
 
 def create_vector_store(data):
@@ -78,6 +81,3 @@ def create_retrieval_chain(vector_store):
     except Exception as e:
         logger.error("Помилка створення RetrievalQA: %s", e)
         return None
-
-
-

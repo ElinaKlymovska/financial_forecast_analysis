@@ -24,3 +24,4 @@ venv/
 chat_history.json
 
 src/db/
+package

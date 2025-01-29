@@ -1,5 +1,5 @@
 import logging
-from typing import List
+from typing import Set
 
 import requests
 import os
@@ -12,7 +12,7 @@ NEWS_API_KEY = os.getenv("NEWS_API_KEY")
 
 
 class NewsAPIDataSource(DataSource):
-    def fetch_data(self, query=None, exclude_categories=None):
+    def fetch_data(self, query=None, exclude_categories=None) -> Set[NormalizedData]:
         base_url = "https://newsapi.org/v2/everything"
         logging.info("Fetching news data from the News API")
 
@@ -29,24 +29,26 @@ class NewsAPIDataSource(DataSource):
         raw_data = response.json().get("articles", [])
         return self.normalize_data(raw_data)
 
-    def normalize_data(self, data: list) -> List[NormalizedData]:
+    def normalize_data(self, data: list) -> Set[NormalizedData]:
         """
         Нормалізація даних новин у формат NormalizedData.
         """
-        normalized_news = [
+        normalized_news = {
             NormalizedData(
-                title=article["title"],
+                title=article.get("title"),
                 author=article.get("author"),
                 description=article.get("description"),
                 content=article.get("content"),
-                url=article["url"],
+                url=article.get("url"),
                 image_url=article.get("urlToImage"),
-                published_at=article["publishedAt"],
-                source=article["source"]["name"],
+                published_at=article.get("publishedAt"),
+                source=article.get("source", {}).get("name"),
             )
             for article in data
-        ]
+        }
         return normalized_news
+
+
 
 def fetch_market_news(query = None, exclude = None):
     base_url = "https://newsapi.org/v2/everything"

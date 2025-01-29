@@ -1,4 +1,5 @@
-from typing import List
+from itertools import islice
+from typing import List, Set
 
 import streamlit as st
 
@@ -26,30 +27,30 @@ def load_and_analyze_data():
     queries = DEFAULT_QUERIES
 
     # Fetching data
-    articles = []
-    for query in queries:
-        data = ingest_data(query=query)
-        articles.extend(data[:1])
+    all_articles = ingest_data(query=DEFAULT_QUERIES)
+
+    selected_articles = set(islice(all_articles, 5))
 
     # Analyzing data
-    analysis_results = analyze_articles(articles[:3])
+    analysis_results = analyze_articles(selected_articles)
 
     # Display results
     st.write("### Crypto news and insights:")
     display_analysis_results(analysis_results)
 
 
-def display_analysis_results(results: List[AnalysisResult]) -> None:
-    """
-    Відображає результати аналізу новин із можливістю розгортання деталей.
-    :param results: Список результатів аналізу.
-    """
+def display_analysis_results(results: Set[AnalysisResult]) -> None:
     st.write("## Analysis Results")
     for result in results:
-        with st.expander(result.initial_data.title, expanded=False):
-            st.write(f"### {result.initial_data.title}")
-            st.write(f"**Published At:** {result.initial_data.published_at or 'Unknown'}")
-            st.write(f"**Source:** {result.initial_data.source or 'Unknown'}")
-            st.write(f"**Analysis:** {result.analyze_result}")
-            if result.initial_data.url:
-                st.markdown(f"[Read Full Article]({result.initial_data.url})", unsafe_allow_html=True)
+        with st.expander(result.initial_data.short_title, expanded=False):
+            col1, col2 = st.columns([1, 3])
+            with col1:
+                image_path = result.initial_data.image_url or "data/images/cartoon eyes.webp"
+                st.image(image_path, use_container_width=True)
+            with col2:
+                st.write(f"### {result.initial_data.title}")
+                st.write(f"**Published At:** {result.initial_data.published_at or 'Unknown'}")
+                st.write(f"**Source:** {result.initial_data.source or 'Unknown'}")
+                st.write(f"**Analysis:** {result.analyze_result}")
+                if result.initial_data.url:
+                    st.markdown(f"[Read Full Article]({result.initial_data.url})", unsafe_allow_html=True)
